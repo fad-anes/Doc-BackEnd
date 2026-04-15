@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.example.pfebackend.Enum.AppointmentStatus;
 import org.example.pfebackend.Enum.ConsultationMode;
 
 import java.io.Serializable;
@@ -23,6 +24,8 @@ public class Appointment implements Serializable{
     private String lienVisio;
     @Enumerated(EnumType.STRING)
     private ConsultationMode consultationMode;
+    @Enumerated(EnumType.STRING)
+    private AppointmentStatus appointmentStatus;
     private boolean paid = false;
     @ManyToOne
     @JsonBackReference

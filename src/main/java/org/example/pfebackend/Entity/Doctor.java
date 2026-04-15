@@ -26,6 +26,7 @@ public class Doctor implements Serializable{
     private String phone;
     private String address;
     private String img;
+    private boolean active = false;
     @Enumerated(EnumType.STRING)
     private MedicalSpecialties speciality;
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -21,6 +21,7 @@ public class MedicalTest implements Serializable{
     private Integer id;
     private String description;
     private LocalDate date;
+    private String result;
     @Enumerated(EnumType.STRING)
     private Status testStatus;
     @ManyToOne
