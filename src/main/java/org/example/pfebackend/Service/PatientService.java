@@ -1,8 +1,11 @@
 package org.example.pfebackend.Service;
 
+import org.example.pfebackend.Dto.NotificationDto;
 import org.example.pfebackend.Dto.PatientDto;
 import org.example.pfebackend.Dto.UserWrapper;
+import org.example.pfebackend.Entity.Admin;
 import org.example.pfebackend.Entity.Patient;
+import org.example.pfebackend.Repository.AdminRepo;
 import org.example.pfebackend.Repository.PatientRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -19,6 +22,13 @@ public class PatientService {
     PatientRepo patientRepo;
     @Autowired
     AuthService authService;
+    @Autowired
+    EmailService emailService;
+    @Autowired
+    NotificationService notificationService;
+    @Autowired
+    AdminRepo adminRepo;
+
     BCryptPasswordEncoder bcryptPasswordEncoder =new BCryptPasswordEncoder();
 
     public ResponseEntity<Patient> AddPatient(PatientDto d){
@@ -33,6 +43,17 @@ public class PatientService {
         patient.setLastName(d.getLastName());
         patient.setPhone(d.getPhone());
         patientRepo.save(patient);
+
+        List<Admin> admins = adminRepo.findAll();
+        for(Admin admin:admins){
+            NotificationDto notifAdmin = new NotificationDto();
+            notifAdmin.setType("ADMIN");
+            notifAdmin.setMessage(
+                    "Un patient avec le nom" + patient.getFirstName() + " " + patient.getLastName() + "."
+                            + " a creer un compte" + ".");
+            notifAdmin.setIdRecever(admin.getId());
+            notificationService.AddNotification(notifAdmin);
+        }
         return ResponseEntity.ok(patient);
     }
 
@@ -76,6 +97,12 @@ public class PatientService {
         Optional<Patient> pa = patientRepo.findById(id);
         if (pa.isPresent()) {
             pa.get().setActive(!pa.get().isActive());
+            if(pa.get().isActive()) {
+                emailService.sendEmail(pa.get().getEmail(), "Activation du compte", "Nous sommes heureux de vous annoncer que votre compte est désormais actif et que vous pouvez accéder à l'application.");
+            }
+            else {
+                emailService.sendEmail(pa.get().getEmail(), "Désactivation du compte", "Nous sommes désolés de vous annoncer que votre compte est temporairement bloqué. Si vous souhaitez le réactiver, veuillez contacter notre support.");
+            }
             return true;
         }
         return false;

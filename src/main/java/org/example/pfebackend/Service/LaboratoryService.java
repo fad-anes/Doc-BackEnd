@@ -1,8 +1,12 @@
 package org.example.pfebackend.Service;
 
 import org.example.pfebackend.Dto.LaboratoryDto;
+import org.example.pfebackend.Dto.NotificationDto;
+import org.example.pfebackend.Dto.UpdateLaboratoryDto;
 import org.example.pfebackend.Dto.UserWrapper;
+import org.example.pfebackend.Entity.Admin;
 import org.example.pfebackend.Entity.Laboratory;
+import org.example.pfebackend.Repository.AdminRepo;
 import org.example.pfebackend.Repository.LaboratoryRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +26,13 @@ public class LaboratoryService {
     UploadFileService uploadFileService;
     @Autowired
     AuthService authService;
+    @Autowired
+    EmailService emailService;
+    @Autowired
+    NotificationService notificationService;
+    @Autowired
+    AdminRepo adminRepo;
+
     BCryptPasswordEncoder bcryptPasswordEncoder =new BCryptPasswordEncoder();
 
 
@@ -39,11 +50,22 @@ public class LaboratoryService {
         String fileName=uploadFileService.uploadFile(d.getFile());
         laboratory.setImg(fileName);
         laboratoryRepo.save(laboratory);
+
+        List<Admin> admins = adminRepo.findAll();
+        for(Admin admin:admins){
+            NotificationDto notifAdmin = new NotificationDto();
+            notifAdmin.setType("ADMIN");
+            notifAdmin.setMessage(
+                    "Une laboratoire avec le nom" + laboratory.getName() + "."
+                            + " a creer un compte" + ".");
+            notifAdmin.setIdRecever(admin.getId());
+            notificationService.AddNotification(notifAdmin);
+        }
         return ResponseEntity.ok(laboratory);
     }
 
-    public ResponseEntity<Laboratory> UpdateLaboratoryWithImage(LaboratoryDto d) throws IOException {
-        Optional<Laboratory> lab = laboratoryRepo.findById(d.getId());
+    public ResponseEntity<Laboratory> UpdateLaboratoryWithImage(LaboratoryDto d,Integer id) throws IOException {
+        Optional<Laboratory> lab = laboratoryRepo.findById(id);
         if (!lab.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -64,22 +86,22 @@ public class LaboratoryService {
         return ResponseEntity.ok(lab.get());
     }
 
-    public ResponseEntity<Laboratory> UpdateLaboratory(Integer id, String name,String email,String password,String phone, String address) {
-        Optional<Laboratory> lab = laboratoryRepo.findById(id);
+    public ResponseEntity<Laboratory> UpdateLaboratory(UpdateLaboratoryDto dto) {
+        Optional<Laboratory> lab = laboratoryRepo.findById(dto.getId());
         if (!lab.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        UserWrapper user = authService.getUserByEmail(email);
-        if(lab.get().getEmail()!=email&&user!=null) {
+        UserWrapper user = authService.getUserByEmail(dto.getEmail());
+        if(lab.get().getEmail()!= dto.getEmail()&&user!=null) {
             return new ResponseEntity<>(HttpStatus.FOUND);
         }
-        if(lab.get().getPassword()!=password) {
-            lab.get().setPassword(bcryptPasswordEncoder.encode(password));
+        if(lab.get().getPassword()!= dto.getPassword()) {
+            lab.get().setPassword(bcryptPasswordEncoder.encode(dto.getPassword()));
         }
-        lab.get().setEmail(email);
-        lab.get().setName(name);
-        lab.get().setAddress(address);
-        lab.get().setPhone(phone);
+        lab.get().setEmail(dto.getEmail());
+        lab.get().setName(dto.getName());
+        lab.get().setAddress(dto.getAddress());
+        lab.get().setPhone(dto.getPhone());
         laboratoryRepo.save(lab.get());
         return ResponseEntity.ok(lab.get());
     }
@@ -104,6 +126,12 @@ public class LaboratoryService {
         Optional<Laboratory> lab = laboratoryRepo.findById(id);
         if (lab.isPresent()) {
             lab.get().setActive(!lab.get().isActive());
+            if(lab.get().isActive()) {
+                emailService.sendEmail(lab.get().getEmail(), "Activation du compte", "Nous sommes heureux de vous annoncer que votre compte est désormais actif et que vous pouvez accéder à l'application.");
+            }
+            else {
+                emailService.sendEmail(lab.get().getEmail(), "Désactivation du compte", "Nous sommes désolés de vous annoncer que votre compte est temporairement bloqué. Si vous souhaitez le réactiver, veuillez contacter notre support.");
+            }
             return true;
         }
         return false;

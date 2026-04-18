@@ -1,6 +1,7 @@
 package org.example.pfebackend.Controller;
 
 import org.example.pfebackend.Dto.LaboratoryDto;
+import org.example.pfebackend.Dto.UpdateLaboratoryDto;
 import org.example.pfebackend.Entity.Laboratory;
 import org.example.pfebackend.Service.LaboratoryService;
 import org.modelmapper.ModelMapper;
@@ -35,9 +36,9 @@ public class LaboratoryController {
         }
     }
 
-    @PostMapping("/UpdateWithImage")
-    public ResponseEntity<Object> UpdateWithImage(@ModelAttribute LaboratoryDto lab) throws IOException {
-        ResponseEntity<Laboratory> user=service.UpdateLaboratoryWithImage(lab);
+    @PostMapping("/UpdateWithImage/{id}")
+    public ResponseEntity<Object> UpdateWithImage(@ModelAttribute LaboratoryDto lab,@PathVariable("id") Integer id) throws IOException {
+        ResponseEntity<Laboratory> user=service.UpdateLaboratoryWithImage(lab,id);
         if (user.getStatusCode() == HttpStatus.OK) {
             Laboratory userDto = modelMapper.map(user.getBody(), Laboratory.class);
             return new ResponseEntity<>(userDto, HttpStatus.OK);
@@ -52,13 +53,8 @@ public class LaboratoryController {
     }
 
     @PostMapping("/Update")
-    public ResponseEntity<Object> Update(@RequestParam String name,
-                                         @RequestParam Integer id,
-                                         @RequestParam String email,
-                                         @RequestParam String password,
-                                         @RequestParam String phone,
-                                         @RequestParam String address)  {
-        ResponseEntity<Laboratory> user=service.UpdateLaboratory(id,name,email,password,phone,address);
+    public ResponseEntity<Object> Update(@RequestBody UpdateLaboratoryDto dto)  {
+        ResponseEntity<Laboratory> user=service.UpdateLaboratory(dto);
         if (user.getStatusCode() == HttpStatus.OK) {
             Laboratory userDto = modelMapper.map(user.getBody(), Laboratory.class);
             return new ResponseEntity<>(userDto, HttpStatus.OK);

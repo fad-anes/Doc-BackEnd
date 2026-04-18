@@ -1,6 +1,7 @@
 package org.example.pfebackend.Service;
 
 import org.example.pfebackend.Dto.MedicalTestDto;
+import org.example.pfebackend.Dto.NotificationDto;
 import org.example.pfebackend.Entity.Doctor;
 import org.example.pfebackend.Entity.Laboratory;
 import org.example.pfebackend.Entity.MedicalTest;
@@ -33,6 +34,8 @@ public class MedicalTestService {
     MedicalTestRepo medicalTestRepo;
     @Autowired
     UploadFileService uploadFileService;
+    @Autowired
+    NotificationService notificationService;
 
     public ResponseEntity<MedicalTest> AddMedicalTest(MedicalTestDto m){
         Optional<Patient> patient=patientRepo.findById(m.getIdPatient());
@@ -48,6 +51,22 @@ public class MedicalTestService {
         medicalTest.setDescription(m.getDescription());
         medicalTest.setTestStatus(Status.CREATED);
         medicalTestRepo.save(medicalTest);
+
+        NotificationDto notifPatient = new NotificationDto();
+        notifPatient.setType("PATIENT");
+        notifPatient.setMessage(
+                "le médecin" + doctor.get().getFirstName() + " " + doctor.get().getLastName() + "."
+                        + " a creer un analyse medicale a realiser par la laboratoire" + laboratory.get().getName() + ".");
+        notifPatient.setIdRecever(patient.get().getId());
+        notificationService.AddNotification(notifPatient);
+
+        NotificationDto notifLab = new NotificationDto();
+        notifLab.setType("LABORATORY");
+        notifLab.setMessage(
+                "le médecin" + doctor.get().getFirstName() + " " + doctor.get().getLastName() + "."
+                        + " a creer un analyse medicale a realiser pour le patient" + patient.get().getFirstName() + " " + patient.get().getLastName() + ".");
+        notifLab.setIdRecever(laboratory.get().getId());
+        notificationService.AddNotification(notifLab);
         return ResponseEntity.ok(medicalTest);
     }
 
@@ -61,6 +80,20 @@ public class MedicalTestService {
         medicalTest.get().setDate(LocalDate.now());
         medicalTest.get().setTestStatus(Status.READY);
         medicalTestRepo.save(medicalTest.get());
+
+        NotificationDto notifPatient = new NotificationDto();
+        notifPatient.setType("PATIENT");
+        notifPatient.setMessage("l'analyse medicale avec l'id" + medicalTest.get().getId()
+                        + "est prêt" + ".");
+        notifPatient.setIdRecever(medicalTest.get().getPatient().getId());
+        notificationService.AddNotification(notifPatient);
+
+        NotificationDto notifDOCTOR = new NotificationDto();
+        notifDOCTOR.setType("DOCTOR");
+        notifDOCTOR.setMessage("l'analyse medicale avec l'id" + medicalTest.get().getId()
+                + "est prêt" + ".");
+        notifDOCTOR.setIdRecever(medicalTest.get().getDoctor().getId());
+        notificationService.AddNotification(notifDOCTOR);
         return ResponseEntity.ok(medicalTest.get());
     }
     public List<MedicalTest> retrieveAllMedicalTest(Integer id,String role){

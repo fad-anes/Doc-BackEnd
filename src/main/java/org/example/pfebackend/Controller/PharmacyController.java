@@ -1,6 +1,7 @@
 package org.example.pfebackend.Controller;
 
 import org.example.pfebackend.Dto.PharmacyDto;
+import org.example.pfebackend.Dto.UpdatePharmacyDto;
 import org.example.pfebackend.Entity.Pharmacy;
 import org.example.pfebackend.Service.PharmacyService;
 import org.modelmapper.ModelMapper;
@@ -35,9 +36,9 @@ public class PharmacyController {
         }
     }
 
-    @PostMapping("/UpdateWithImage")
-    public ResponseEntity<Object> UpdateWithImage(@ModelAttribute PharmacyDto pha) throws IOException {
-        ResponseEntity<Pharmacy> user=service.UpdatePharmacyWithImage(pha);
+    @PutMapping("/UpdateWithImage/{id}")
+    public ResponseEntity<Object> UpdateWithImage(@ModelAttribute PharmacyDto pha,@PathVariable("id") Integer id) throws IOException {
+        ResponseEntity<Pharmacy> user=service.UpdatePharmacyWithImage(pha,id);
         if (user.getStatusCode() == HttpStatus.OK) {
             Pharmacy userDto = modelMapper.map(user.getBody(), Pharmacy.class);
             return new ResponseEntity<>(userDto, HttpStatus.OK);
@@ -52,13 +53,8 @@ public class PharmacyController {
     }
 
     @PostMapping("/Update")
-    public ResponseEntity<Object> Update(@RequestParam String name,
-                                         @RequestParam Integer id,
-                                         @RequestParam String email,
-                                         @RequestParam String password,
-                                         @RequestParam String phone,
-                                         @RequestParam String address)  {
-        ResponseEntity<Pharmacy> user=service.UpdatePharmacy(id,name,email,password,phone,address);
+    public ResponseEntity<Object> Update(@RequestBody UpdatePharmacyDto dto)  {
+        ResponseEntity<Pharmacy> user=service.UpdatePharmacy(dto);
         if (user.getStatusCode() == HttpStatus.OK) {
             Pharmacy userDto = modelMapper.map(user.getBody(), Pharmacy.class);
             return new ResponseEntity<>(userDto, HttpStatus.OK);

@@ -1,6 +1,7 @@
 package org.example.pfebackend.Controller;
 
 import org.example.pfebackend.Dto.DoctorDto;
+import org.example.pfebackend.Dto.UpdateDoctorDto;
 import org.example.pfebackend.Entity.Doctor;
 import org.example.pfebackend.Service.DoctorService;
 import org.modelmapper.ModelMapper;
@@ -35,9 +36,9 @@ public class DoctorController {
         }
     }
 
-    @PostMapping("/UpdateWithImage")
-    public ResponseEntity<Object> UpdateWithImage(@ModelAttribute DoctorDto doc) throws IOException {
-        ResponseEntity<Doctor> user=service.UpdateDoctorWithImage(doc);
+    @PostMapping("/UpdateWithImage/{id}")
+    public ResponseEntity<Object> UpdateWithImage(@ModelAttribute DoctorDto doc,@PathVariable("id") Integer id) throws IOException {
+        ResponseEntity<Doctor> user=service.UpdateDoctorWithImage(doc,id);
         if (user.getStatusCode() == HttpStatus.OK) {
             Doctor userDto = modelMapper.map(user.getBody(), Doctor.class);
             return new ResponseEntity<>(userDto, HttpStatus.OK);
@@ -52,14 +53,8 @@ public class DoctorController {
     }
 
     @PostMapping("/Update")
-    public ResponseEntity<Object> Update(@RequestParam String firstName,
-                                         @RequestParam String lastName,
-                                         @RequestParam Integer id,
-                                         @RequestParam String email,
-                                         @RequestParam String password,
-                                         @RequestParam String phone,
-                                         @RequestParam String address)  {
-        ResponseEntity<Doctor> user=service.UpdateDoctor(id,firstName,lastName,email,password,phone,address);
+    public ResponseEntity<Object> Update(@RequestBody UpdateDoctorDto dto)  {
+        ResponseEntity<Doctor> user=service.UpdateDoctor(dto);
         if (user.getStatusCode() == HttpStatus.OK) {
             Doctor userDto = modelMapper.map(user.getBody(), Doctor.class);
             return new ResponseEntity<>(userDto, HttpStatus.OK);

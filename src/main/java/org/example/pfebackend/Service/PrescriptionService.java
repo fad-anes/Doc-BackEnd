@@ -1,5 +1,6 @@
 package org.example.pfebackend.Service;
 
+import org.example.pfebackend.Dto.NotificationDto;
 import org.example.pfebackend.Dto.PrescriptionDto;
 import org.example.pfebackend.Entity.*;
 import org.example.pfebackend.Enum.Status;
@@ -26,6 +27,8 @@ public class PrescriptionService {
     PharmacyRepo pharmacyRepo;
     @Autowired
     PrescriptionRepo prescriptionRepo;
+    @Autowired
+    NotificationService notificationService;
 
     public ResponseEntity<Prescription> AddPrescription(PrescriptionDto p){
         Optional<Patient> patient=patientRepo.findById(p.getIdPatient());
@@ -41,6 +44,22 @@ public class PrescriptionService {
         prescription.setDescription(p.getDescription());
         prescription.setPrescriptionStatus(Status.CREATED);
         prescriptionRepo.save(prescription);
+
+        NotificationDto notifPatient = new NotificationDto();
+        notifPatient.setType("PATIENT");
+        notifPatient.setMessage(
+                "le médecin" + doctor.get().getFirstName() + " " + doctor.get().getLastName() + "."
+                        + " a creer une ordonnance a realiser par la pharmacie" + pharmacy.get().getName() + ".");
+        notifPatient.setIdRecever(patient.get().getId());
+        notificationService.AddNotification(notifPatient);
+
+        NotificationDto notifPharmacy = new NotificationDto();
+        notifPharmacy.setType("LABORATORY");
+        notifPharmacy.setMessage(
+                "le médecin" + doctor.get().getFirstName() + " " + doctor.get().getLastName() + "."
+                        + " a creer une ordonnance a realiser pour le patient" + patient.get().getFirstName() + " " + patient.get().getLastName() + ".");
+        notifPharmacy.setIdRecever(pharmacy.get().getId());
+        notificationService.AddNotification(notifPharmacy);
         return ResponseEntity.ok(prescription);
     }
 
@@ -52,6 +71,13 @@ public class PrescriptionService {
         prescription.get().setDate(LocalDate.now());
         prescription.get().setPrescriptionStatus(Status.READY);
         prescriptionRepo.save(prescription.get());
+
+        NotificationDto notifPatient = new NotificationDto();
+        notifPatient.setType("PATIENT");
+        notifPatient.setMessage("l'ordonnance avec l'id" + prescription.get().getId()
+                + "est prêt" + ".");
+        notifPatient.setIdRecever(prescription.get().getPatient().getId());
+        notificationService.AddNotification(notifPatient);
         return ResponseEntity.ok(prescription.get());
     }
 

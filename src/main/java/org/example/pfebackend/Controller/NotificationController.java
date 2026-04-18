@@ -37,14 +37,12 @@ public class NotificationController {
         return new ResponseEntity<>("Non trouvé", HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping
-    public ResponseEntity<Object> Add(@RequestBody NotificationDto n)  {
-        ResponseEntity<Notification> user=service.AddNotification(n);
-        if (user.getStatusCode() == HttpStatus.OK) {
-            Notification userDto = modelMapper.map(user.getBody(), Notification.class);
-            return new ResponseEntity<>(userDto, HttpStatus.OK);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> Delete (@PathVariable("id") Integer id) {
+        boolean deleted = service.delete(id);
+        if (deleted) {
+            return new ResponseEntity<>("deleted", HttpStatus.OK);
         }
-        return new ResponseEntity<>("Erreur Inconnu", HttpStatus.BAD_REQUEST);
-
+        return new ResponseEntity<>("Non trouvé", HttpStatus.NOT_FOUND);
     }
 }

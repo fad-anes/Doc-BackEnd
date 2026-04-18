@@ -1,8 +1,12 @@
 package org.example.pfebackend.Service;
 
 import org.example.pfebackend.Dto.DoctorDto;
+import org.example.pfebackend.Dto.NotificationDto;
+import org.example.pfebackend.Dto.UpdateDoctorDto;
 import org.example.pfebackend.Dto.UserWrapper;
+import org.example.pfebackend.Entity.Admin;
 import org.example.pfebackend.Entity.Doctor;
+import org.example.pfebackend.Repository.AdminRepo;
 import org.example.pfebackend.Repository.DoctorRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +26,12 @@ public class DoctorService {
     UploadFileService uploadFileService;
     @Autowired
     AuthService authService;
+    @Autowired
+    EmailService emailService;
+    @Autowired
+    NotificationService notificationService;
+    @Autowired
+    AdminRepo adminRepo;
     BCryptPasswordEncoder bcryptPasswordEncoder =new BCryptPasswordEncoder();
 
     public ResponseEntity<Doctor> AddDoctor(DoctorDto d) throws IOException {
@@ -39,11 +49,21 @@ public class DoctorService {
         String fileName=uploadFileService.uploadFile(d.getFile());
         doctor.setImg(fileName);
         doctorRepo.save(doctor);
+        List<Admin> admins = adminRepo.findAll();
+        for(Admin admin:admins){
+            NotificationDto notifAdmin = new NotificationDto();
+            notifAdmin.setType("ADMIN");
+            notifAdmin.setMessage(
+                    "Un medecin avec le nom" + doctor.getFirstName() + " " + doctor.getLastName() + "."
+                            + " a creer un compte" + ".");
+            notifAdmin.setIdRecever(admin.getId());
+            notificationService.AddNotification(notifAdmin);
+        }
         return ResponseEntity.ok(doctor);
     }
 
-    public ResponseEntity<Doctor> UpdateDoctorWithImage(DoctorDto d) throws IOException {
-        Optional<Doctor> doc = doctorRepo.findById(d.getId());
+    public ResponseEntity<Doctor> UpdateDoctorWithImage(DoctorDto d,Integer id) throws IOException {
+        Optional<Doctor> doc = doctorRepo.findById(id);
         if (!doc.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -64,23 +84,23 @@ public class DoctorService {
         doctorRepo.save(doc.get());
         return ResponseEntity.ok(doc.get());
     }
-    public ResponseEntity<Doctor> UpdateDoctor(Integer id, String firstName,String lastName,String email,String password,String phone, String address) {
-        Optional<Doctor> doc = doctorRepo.findById(id);
+    public ResponseEntity<Doctor> UpdateDoctor(UpdateDoctorDto dto) {
+        Optional<Doctor> doc = doctorRepo.findById(dto.getId());
         if (!doc.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        UserWrapper user = authService.getUserByEmail(email);
-        if(doc.get().getEmail()!=email&&user!=null) {
+        UserWrapper user = authService.getUserByEmail(dto.getEmail());
+        if(doc.get().getEmail()!=dto.getEmail()&&user!=null) {
             return new ResponseEntity<>(HttpStatus.FOUND);
         }
-        if(doc.get().getPassword()!=password) {
-            doc.get().setPassword(bcryptPasswordEncoder.encode(password));
+        if(doc.get().getPassword()!=dto.getPassword()) {
+            doc.get().setPassword(bcryptPasswordEncoder.encode(dto.getPassword()));
         }
-        doc.get().setEmail(email);
-        doc.get().setFirstName(firstName);
-        doc.get().setLastName(lastName);
-        doc.get().setAddress(address);
-        doc.get().setPhone(phone);
+        doc.get().setEmail(dto.getEmail());
+        doc.get().setFirstName(dto.getFirstName());
+        doc.get().setLastName(dto.getLastName());
+        doc.get().setAddress(dto.getAddress());
+        doc.get().setPhone(dto.getPhone());
         doctorRepo.save(doc.get());
         return ResponseEntity.ok(doc.get());
     }
@@ -105,6 +125,12 @@ public class DoctorService {
         Optional<Doctor> doc = doctorRepo.findById(id);
         if (doc.isPresent()) {
             doc.get().setActive(!doc.get().isActive());
+            if(doc.get().isActive()) {
+                emailService.sendEmail(doc.get().getEmail(), "Activation du compte", "Nous sommes heureux de vous annoncer que votre compte est désormais actif et que vous pouvez accéder à l'application.");
+            }
+            else {
+                emailService.sendEmail(doc.get().getEmail(), "Désactivation du compte", "Nous sommes désolés de vous annoncer que votre compte est temporairement bloqué. Si vous souhaitez le réactiver, veuillez contacter notre support.");
+            }
             return true;
         }
         return false;

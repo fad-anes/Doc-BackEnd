@@ -28,13 +28,22 @@ public class NotificationService {
         return false;
     }
 
-    public ResponseEntity<Notification> AddNotification(NotificationDto n) {
+    public boolean delete(Integer id){
+        Notification notification = notificationRepo.findById(id).get();
+        if(notification!=null){
+            notificationRepo.delete(notification);
+            return true;
+        }
+        return false;
+    }
+
+    public Notification AddNotification(NotificationDto n) {
         Notification notification = new Notification();
         notification.setType(n.getType());
         notification.setMessage(n.getMessage());
         notification.setIdRecever(n.getIdRecever());
         notificationRepo.save(notification);
-        return ResponseEntity.ok(notification);
+        return notification;
     }
 
 }

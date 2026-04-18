@@ -11,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 @Getter
 @Setter
 public class DoctorDto {
-    private Integer id;
     private String firstName;
     private String lastName;
     private String email;
