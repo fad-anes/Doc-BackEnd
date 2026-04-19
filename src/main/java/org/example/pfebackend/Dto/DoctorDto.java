@@ -17,5 +17,6 @@ public class DoctorDto {
     private String password;
     private String phone;
     private String address;
+    private String speciality;
     private MultipartFile file;
 }

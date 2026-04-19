@@ -6,6 +6,8 @@ import org.example.pfebackend.Dto.UpdateDoctorDto;
 import org.example.pfebackend.Dto.UserWrapper;
 import org.example.pfebackend.Entity.Admin;
 import org.example.pfebackend.Entity.Doctor;
+import org.example.pfebackend.Enum.ConsultationMode;
+import org.example.pfebackend.Enum.MedicalSpecialties;
 import org.example.pfebackend.Repository.AdminRepo;
 import org.example.pfebackend.Repository.DoctorRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -45,6 +48,8 @@ public class DoctorService {
         doctor.setFirstName(d.getFirstName());
         doctor.setLastName(d.getLastName());
         doctor.setAddress(d.getAddress());
+        MedicalSpecialties speciality = MedicalSpecialties.valueOf(d.getSpeciality().toUpperCase());
+        doctor.setSpeciality(speciality);
         doctor.setPhone(d.getPhone());
         String fileName=uploadFileService.uploadFile(d.getFile());
         doctor.setImg(fileName);
@@ -68,10 +73,10 @@ public class DoctorService {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         UserWrapper user = authService.getUserByEmail(d.getEmail());
-        if(doc.get().getEmail()!=d.getEmail()&&user!=null) {
+        if(!Objects.equals(doc.get().getEmail(), d.getEmail()) &&user!=null) {
             return new ResponseEntity<>(HttpStatus.FOUND);
         }
-        if(doc.get().getPassword()!=d.getPassword()) {
+        if(!Objects.equals(doc.get().getPassword(), d.getPassword())) {
             doc.get().setPassword(bcryptPasswordEncoder.encode(d.getPassword()));
         }
         doc.get().setEmail(d.getEmail());
@@ -79,6 +84,8 @@ public class DoctorService {
         doc.get().setLastName(d.getLastName());
         doc.get().setAddress(d.getAddress());
         doc.get().setPhone(d.getPhone());
+        MedicalSpecialties speciality = MedicalSpecialties.valueOf(d.getSpeciality().toUpperCase());
+        doc.get().setSpeciality(speciality);
         String fileName=uploadFileService.uploadFile(d.getFile());
         doc.get().setImg(fileName);
         doctorRepo.save(doc.get());
@@ -90,10 +97,10 @@ public class DoctorService {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         UserWrapper user = authService.getUserByEmail(dto.getEmail());
-        if(doc.get().getEmail()!=dto.getEmail()&&user!=null) {
+        if(!Objects.equals(doc.get().getEmail(), dto.getEmail()) &&user!=null) {
             return new ResponseEntity<>(HttpStatus.FOUND);
         }
-        if(doc.get().getPassword()!=dto.getPassword()) {
+        if(!Objects.equals(doc.get().getPassword(), dto.getPassword())) {
             doc.get().setPassword(bcryptPasswordEncoder.encode(dto.getPassword()));
         }
         doc.get().setEmail(dto.getEmail());
@@ -101,6 +108,8 @@ public class DoctorService {
         doc.get().setLastName(dto.getLastName());
         doc.get().setAddress(dto.getAddress());
         doc.get().setPhone(dto.getPhone());
+        MedicalSpecialties speciality = MedicalSpecialties.valueOf(dto.getSpeciality().toUpperCase());
+        doc.get().setSpeciality(speciality);
         doctorRepo.save(doc.get());
         return ResponseEntity.ok(doc.get());
     }

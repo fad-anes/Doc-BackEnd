@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -63,10 +64,10 @@ public class PatientService {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         UserWrapper user = authService.getUserByEmail(p.getEmail());
-        if(pa.get().getEmail()!=p.getEmail()&&user!=null) {
+        if(!Objects.equals(pa.get().getEmail(), p.getEmail()) &&user!=null) {
             return new ResponseEntity<>(HttpStatus.FOUND);
         }
-        if(pa.get().getPassword()!=p.getPassword()) {
+        if(!Objects.equals(pa.get().getPassword(), p.getPassword())) {
             pa.get().setPassword(bcryptPasswordEncoder.encode(p.getPassword()));
         }
         pa.get().setEmail(p.getEmail());

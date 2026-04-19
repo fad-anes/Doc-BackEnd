@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -70,10 +71,10 @@ public class LaboratoryService {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         UserWrapper user = authService.getUserByEmail(d.getEmail());
-        if(lab.get().getEmail()!=d.getEmail()&&user!=null) {
+        if(!Objects.equals(lab.get().getEmail(), d.getEmail()) &&user!=null) {
             return new ResponseEntity<>(HttpStatus.FOUND);
         }
-        if(lab.get().getPassword()!=d.getPassword()) {
+        if(!Objects.equals(lab.get().getPassword(), d.getPassword())) {
             lab.get().setPassword(bcryptPasswordEncoder.encode(d.getPassword()));
         }
         lab.get().setEmail(d.getEmail());
@@ -92,10 +93,10 @@ public class LaboratoryService {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         UserWrapper user = authService.getUserByEmail(dto.getEmail());
-        if(lab.get().getEmail()!= dto.getEmail()&&user!=null) {
+        if(!Objects.equals(lab.get().getEmail(), dto.getEmail()) &&user!=null) {
             return new ResponseEntity<>(HttpStatus.FOUND);
         }
-        if(lab.get().getPassword()!= dto.getPassword()) {
+        if(!Objects.equals(lab.get().getPassword(), dto.getPassword())) {
             lab.get().setPassword(bcryptPasswordEncoder.encode(dto.getPassword()));
         }
         lab.get().setEmail(dto.getEmail());

@@ -9,13 +9,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class UpdateDoctorDto {
-    private Integer id;
-    private String firstName;
-    private String lastName;
+public class OtpDto {
+    private String number;
     private String email;
     private String password;
-    private String phone;
-    private String address;
-    private String speciality;
 }

@@ -3,23 +3,24 @@ package org.example.pfebackend.Controller;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.example.pfebackend.Dto.LoginDto;
+import org.example.pfebackend.Dto.OtpDto;
 import org.example.pfebackend.Dto.UserWrapper;
 import org.example.pfebackend.Entity.*;
 import org.example.pfebackend.Service.AuthService;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin("*")
 public class LoginController {
     @Autowired
     AuthService service;
+    @Autowired
+    ModelMapper modelMapper;
 
     private String generateToken(String email, String name, String role, Integer id) {
         return Jwts.builder()
@@ -116,5 +117,31 @@ public class LoginController {
                         .body("Rôle inconnu");
         }
     }
+    @PutMapping("/{email}")
+    public ResponseEntity<Object>AddOtp (@PathVariable("email") String email) {
+        ResponseEntity<Otp> obj=service.AddOtp(email);
+        if (obj.getStatusCode() == HttpStatus.OK) {
+            Otp mapper = modelMapper.map(obj.getBody(), Otp.class);
+            return new ResponseEntity<>(mapper, HttpStatus.OK);
+        } else if (obj.getStatusCode() == HttpStatus.NOT_FOUND) {
+            return new ResponseEntity<>("Utilisateur introuvable", HttpStatus.NOT_FOUND);
+        }else {
+            return new ResponseEntity<>("Erreur Inconnu", HttpStatus.BAD_REQUEST);
+        }
+    }
 
+    @PostMapping("ResetPassword")
+    public ResponseEntity<Object>ResetPassword (@RequestBody OtpDto dto) {
+        ResponseEntity<Otp> obj=service.ChangePassword(dto);
+        if (obj.getStatusCode() == HttpStatus.OK) {
+            Otp mapper = modelMapper.map(obj.getBody(), Otp.class);
+            return new ResponseEntity<>(mapper, HttpStatus.OK);
+        } else if (obj.getStatusCode() == HttpStatus.NOT_FOUND) {
+            return new ResponseEntity<>("Utilisateur introuvable", HttpStatus.NOT_FOUND);
+        }else if (obj.getStatusCode() == HttpStatus.BAD_REQUEST) {
+            return new ResponseEntity<>("Code incorrecte", HttpStatus.BAD_REQUEST);
+        }else {
+            return new ResponseEntity<>("Erreur Inconnu", HttpStatus.BAD_REQUEST);
+        }
+    }
 }

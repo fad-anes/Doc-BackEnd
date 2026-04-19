@@ -20,6 +20,6 @@ public class UploadFileService {
 
         Path filePath = Paths.get(uploadDir + fileName);
         Files.write(filePath, file.getBytes());
-        return "http://localhost:8085/uploads/" + fileName;
+        return "http://localhost:8085/api/uploads/" + fileName;
     }
 }

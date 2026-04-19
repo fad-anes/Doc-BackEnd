@@ -36,7 +36,7 @@ public class DoctorController {
         }
     }
 
-    @PostMapping("/UpdateWithImage/{id}")
+    @PutMapping("/UpdateWithImage/{id}")
     public ResponseEntity<Object> UpdateWithImage(@ModelAttribute DoctorDto doc,@PathVariable("id") Integer id) throws IOException {
         ResponseEntity<Doctor> user=service.UpdateDoctorWithImage(doc,id);
         if (user.getStatusCode() == HttpStatus.OK) {
