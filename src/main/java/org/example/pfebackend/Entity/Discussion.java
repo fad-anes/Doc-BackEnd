@@ -22,10 +22,10 @@ public class Discussion implements Serializable{
     private Integer id;
     private LocalDateTime createdAt = LocalDateTime.now();
     @ManyToOne
-    @JsonBackReference
+    @JsonManagedReference
     private Doctor doctor;
     @ManyToOne
-    @JsonBackReference
+    @JsonManagedReference
     private Patient patient;
     @OneToMany(mappedBy = "discussion", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference

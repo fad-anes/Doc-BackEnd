@@ -1,18 +1,20 @@
 package org.example.pfebackend.Service;
 
+import org.example.pfebackend.Dto.GetPatientsDto;
 import org.example.pfebackend.Dto.NotificationDto;
 import org.example.pfebackend.Dto.PatientDto;
 import org.example.pfebackend.Dto.UserWrapper;
 import org.example.pfebackend.Entity.Admin;
+import org.example.pfebackend.Entity.Appointment;
 import org.example.pfebackend.Entity.Patient;
-import org.example.pfebackend.Repository.AdminRepo;
-import org.example.pfebackend.Repository.PatientRepo;
+import org.example.pfebackend.Repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,6 +31,12 @@ public class PatientService {
     NotificationService notificationService;
     @Autowired
     AdminRepo adminRepo;
+    @Autowired
+    AppointmentRepo appointmentRepo;
+    @Autowired
+    PrescriptionRepo prescriptionRepo;
+    @Autowired
+    MedicalTestRepo medicalTestRepo;
 
     BCryptPasswordEncoder bcryptPasswordEncoder =new BCryptPasswordEncoder();
 
@@ -93,11 +101,40 @@ public class PatientService {
         }
         return false;
     }
-
+    public List<Patient> retrieveAllPatientByDoctorId(Integer id){
+        List<Patient> patients = new ArrayList<>();
+        List<Patient> p= patientRepo.findAll();
+        List<Appointment> a= appointmentRepo.findByDoctor_Id(id);
+        for(Appointment appointment:a){
+           for(Patient patient:p){
+               if(appointment.getPatient().getId().equals(patient.getId())){
+                   patients.add(appointment.getPatient());
+               }
+           }
+        }
+        return patients;
+    }
+    public GetPatientsDto retrievePatientFolder(Integer id){
+        Optional<Patient> pa = patientRepo.findById(id);
+        if(!pa.isPresent()) {
+            return null;
+        }
+        GetPatientsDto dto = new GetPatientsDto();
+        dto.setFirstName(pa.get().getFirstName());
+        dto.setLastName(pa.get().getLastName());
+        dto.setEmail(pa.get().getEmail());
+        dto.setPassword(pa.get().getPassword());
+        dto.setPhone(pa.get().getPhone());
+        dto.setAppointments(appointmentRepo.findByPatient_Id(id));
+        dto.setPrescriptions(prescriptionRepo.findByPatient_Id(id));
+        dto.setMedicalTests(medicalTestRepo.findByPatient_Id(id));
+        return dto;
+    }
     public Boolean changeStatus(Integer id) {
         Optional<Patient> pa = patientRepo.findById(id);
         if (pa.isPresent()) {
             pa.get().setActive(!pa.get().isActive());
+            patientRepo.save(pa.get());
             if(pa.get().isActive()) {
                 emailService.sendEmail(pa.get().getEmail(), "Activation du compte", "Nous sommes heureux de vous annoncer que votre compte est désormais actif et que vous pouvez accéder à l'application.");
             }

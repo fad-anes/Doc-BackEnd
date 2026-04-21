@@ -50,7 +50,7 @@ public class DayOffController {
 
     @GetMapping("/{id}")
     public List<DayOff> retrieveAllDayOff(@PathVariable("id") Integer id) {
-        return service.retrieveAllDaysByPatient(id);
+        return service.retrieveAllDaysByDoctor(id);
     }
 
     @DeleteMapping("/{id}")

@@ -134,6 +134,7 @@ public class DoctorService {
         Optional<Doctor> doc = doctorRepo.findById(id);
         if (doc.isPresent()) {
             doc.get().setActive(!doc.get().isActive());
+            doctorRepo.save(doc.get());
             if(doc.get().isActive()) {
                 emailService.sendEmail(doc.get().getEmail(), "Activation du compte", "Nous sommes heureux de vous annoncer que votre compte est désormais actif et que vous pouvez accéder à l'application.");
             }

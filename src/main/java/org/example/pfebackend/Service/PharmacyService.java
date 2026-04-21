@@ -125,6 +125,7 @@ public class PharmacyService {
         Optional<Pharmacy> pha = pharmacyRepo.findById(id);
         if (pha.isPresent()) {
             pha.get().setActive(!pha.get().isActive());
+            pharmacyRepo.save(pha.get());
             if(pha.get().isActive()) {
                 emailService.sendEmail(pha.get().getEmail(), "Activation du compte", "Nous sommes heureux de vous annoncer que votre compte est désormais actif et que vous pouvez accéder à l'application.");
             }

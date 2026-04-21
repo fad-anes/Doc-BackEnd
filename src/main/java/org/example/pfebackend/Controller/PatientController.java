@@ -1,5 +1,6 @@
 package org.example.pfebackend.Controller;
 
+import org.example.pfebackend.Dto.GetPatientsDto;
 import org.example.pfebackend.Dto.PatientDto;
 import org.example.pfebackend.Entity.Patient;
 import org.example.pfebackend.Service.PatientService;
@@ -60,6 +61,15 @@ public class PatientController {
     @GetMapping("/All")
     public List<Patient> retrieveAllDoctors() {
         return service.retrieveAllPatient();
+    }
+    @GetMapping("/AllByDoctor/{id}")
+    public List<Patient> AllByDoctor(@PathVariable("id") Integer id) {
+        return service.retrieveAllPatientByDoctorId(id);
+    }
+
+    @GetMapping("/PatientFolder/{id}")
+    public GetPatientsDto PatientFolder(@PathVariable("id") Integer id) {
+        return service.retrievePatientFolder(id);
     }
     @DeleteMapping("/{id}")
     public ResponseEntity<Object>delete (@PathVariable("id") Integer id) {

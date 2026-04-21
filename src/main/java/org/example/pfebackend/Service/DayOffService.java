@@ -20,8 +20,8 @@ public class DayOffService {
     DoctorRepo doctorRepo;
 
     public ResponseEntity<DayOff> AddDayOff(DayOffDto d) {
-        boolean exist = dayOffRepo.findByDateOffAndDoctor_Id(d.getDateOff(),d.getId());
-        if(exist) {
+        Optional<DayOff> exist = dayOffRepo.findByDateOffAndDoctor_Id(d.getDateOff(),d.getId());
+        if(exist.isPresent()) {
             return new ResponseEntity<>(HttpStatus.FOUND);
         }
         DayOff dayOff = new DayOff();
@@ -31,16 +31,19 @@ public class DayOffService {
         return ResponseEntity.ok(dayOff);
     }
     public ResponseEntity<DayOff> UpdateDayOff(DayOffDto d) {
-        DayOff dayOff = dayOffRepo.findById(d.getId()).get();
-        if(dayOff==null){
+        Optional<DayOff> optional = dayOffRepo.findById(d.getId());
+
+        if (!optional.isPresent()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+
+        DayOff dayOff = optional.get();
         dayOff.setDateOff(d.getDateOff());
         dayOffRepo.save(dayOff);
         return ResponseEntity.ok(dayOff);
     }
 
-    public List<DayOff> retrieveAllDaysByPatient(Integer id){
+    public List<DayOff> retrieveAllDaysByDoctor(Integer id){
         return dayOffRepo.findByDoctor_Id(id);
     }
     public Boolean deleteDayOff(Integer id) {

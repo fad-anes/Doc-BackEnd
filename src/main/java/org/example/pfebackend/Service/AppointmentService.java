@@ -3,10 +3,12 @@ package org.example.pfebackend.Service;
 import org.example.pfebackend.Dto.AppointmentDto;
 import org.example.pfebackend.Dto.NotificationDto;
 import org.example.pfebackend.Entity.Appointment;
+import org.example.pfebackend.Entity.DayOff;
 import org.example.pfebackend.Entity.Doctor;
 import org.example.pfebackend.Entity.Patient;
 import org.example.pfebackend.Enum.AppointmentStatus;
 import org.example.pfebackend.Enum.ConsultationMode;
+import org.example.pfebackend.Repository.DayOffRepo;
 import org.example.pfebackend.Repository.PatientRepo;
 import org.example.pfebackend.Repository.DoctorRepo;
 import org.example.pfebackend.Repository.AppointmentRepo;
@@ -15,7 +17,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -28,6 +33,8 @@ public class AppointmentService {
     AppointmentRepo appointmentRepo;
     @Autowired
     NotificationService notificationService;
+    @Autowired
+    DayOffRepo dayOffRepo;
 
     public ResponseEntity<Appointment> AddAppointment(AppointmentDto a) {
 
@@ -40,20 +47,23 @@ public class AppointmentService {
 
         Patient patient = patientOpt.get();
         Doctor doctor = doctorOpt.get();
-
+        LocalDateTime date = LocalDateTime.parse(a.getDate());
         Optional<Appointment> existDoctor = appointmentRepo
-                .findByDateAndDoctor_Id(a.getDate(), a.getIdDoctor());
+                .findByDateAndDoctor_Id(date, a.getIdDoctor());
 
         Optional<Appointment> existPatient = appointmentRepo
-                .findByDateAndPatient_Id(a.getDate(), a.getIdPatient());
+                .findByDateAndPatient_Id(date, a.getIdPatient());
 
         if (existDoctor.isPresent() || existPatient.isPresent()) {
             return new ResponseEntity<>(HttpStatus.FOUND);
         }
-
+        Optional<DayOff> exist = dayOffRepo.findByDateOffAndDoctor_Id(date.toLocalDate(),a.getIdDoctor());
+        if (exist.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.FOUND);
+        }
         Appointment appointment = new Appointment();
 
-        appointment.setDate(a.getDate());
+        appointment.setDate(date);
         appointment.setDoctor(doctor);
         appointment.setPatient(patient);
         appointment.setAppointmentStatus(AppointmentStatus.ATT);
@@ -104,6 +114,7 @@ public class AppointmentService {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         a.get().setPaid(true);
+        a.get().setAppointmentStatus(AppointmentStatus.RES);
         appointmentRepo.save(a.get());
         return ResponseEntity.ok(a.get());
     }
@@ -113,12 +124,17 @@ public class AppointmentService {
         if(!appointment.isPresent()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        Optional<Appointment> exist1=appointmentRepo.findByDateAndDoctor_Id(a.getDate(),a.getIdDoctor());
-        Optional<Appointment> exist2=appointmentRepo.findByDateAndPatient_Id(a.getDate(),a.getIdPatient());
+        LocalDateTime date = LocalDateTime.parse(a.getDate());
+        Optional<Appointment> exist1=appointmentRepo.findByDateAndDoctor_Id(date,a.getIdDoctor());
+        Optional<Appointment> exist2=appointmentRepo.findByDateAndPatient_Id(date,a.getIdPatient());
         if((exist1.isPresent()&&appointment.get().getId()!=exist1.get().getId()) || (exist2.isPresent()&&appointment.get().getId()!=exist2.get().getId())){
             return new ResponseEntity<>(HttpStatus.FOUND);
         }
-        appointment.get().setDate(a.getDate());
+        Optional<DayOff> exist = dayOffRepo.findByDateOffAndDoctor_Id(date.toLocalDate(),a.getIdDoctor());
+        if (exist.isPresent()) {
+            return new ResponseEntity<>(HttpStatus.FOUND);
+        }
+        appointment.get().setDate(date);
         appointment.get().setConsultationMode(ConsultationMode.valueOf(a.getConsultationMode().toUpperCase()));
         if(appointment.get().getConsultationMode().toString()=="EN_LIGNE"){
             appointment.get().setPaid(false);
@@ -152,10 +168,26 @@ public class AppointmentService {
         return ResponseEntity.ok(appointment.get());
     }
 
-    public List<Appointment> retrieveAllAppointment(Integer id,String role){
-        if(role.equals("DOCTOR")){
-            return appointmentRepo.findByDoctor_Id(id);
+    public List<Appointment> retrieveAllAppointment(Integer id, String role) {
+
+        List<Appointment> apps;
+
+        if ("DOCTOR".equals(role)) {
+            apps = appointmentRepo.findByDoctor_Id(id);
+        } else {
+            apps = appointmentRepo.findByPatient_Id(id);
         }
-        return appointmentRepo.findByPatient_Id(id);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        for (Appointment a : apps) {
+
+            if (a.getDate() != null && a.getDate().isBefore(now)) {
+                a.setAppointmentStatus(AppointmentStatus.TER);
+                appointmentRepo.save(a);
+            }
+        }
+
+        return apps;
     }
 }

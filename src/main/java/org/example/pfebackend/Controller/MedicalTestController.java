@@ -34,9 +34,9 @@ public class MedicalTestController {
             return new ResponseEntity<>("Erreur Inconnu", HttpStatus.BAD_REQUEST);
         }
     }
-    @PostMapping("/Result")
+    @PutMapping("/Result/{id}")
     public ResponseEntity<Object> Result(@RequestParam MultipartFile file,
-                                         @RequestParam Integer id) throws IOException {
+                                         @PathVariable("id") Integer id) throws IOException {
         ResponseEntity<MedicalTest> user=service.ResultMedicalTest(id,file);
         if (user.getStatusCode() == HttpStatus.OK) {
             MedicalTest userDto = modelMapper.map(user.getBody(), MedicalTest.class);

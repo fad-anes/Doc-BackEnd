@@ -1,5 +1,6 @@
 package org.example.pfebackend.Dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,5 +14,6 @@ import java.time.LocalDate;
 @Setter
 public class DayOffDto {
     private Integer id;
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate dateOff;
 }

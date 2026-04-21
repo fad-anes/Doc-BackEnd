@@ -1,4 +1,5 @@
 package org.example.pfebackend.Entity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.example.pfebackend.Enum.MedicalSpecialties;
 import jakarta.persistence.*;
@@ -33,15 +34,15 @@ public class Doctor implements Serializable{
     @JsonManagedReference
     private Set<DayOff> daysOffs;
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonBackReference
     private Set<Appointment> appointments;
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonBackReference
     private Set<Prescription> prescriptions;
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonBackReference
     private Set<MedicalTest> medicalTests;
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonBackReference
     private Set<Discussion> discussions;
 }

@@ -1,4 +1,5 @@
 package org.example.pfebackend.Entity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -26,6 +27,6 @@ public class Pharmacy implements Serializable{
     private String img;
     private boolean active = false;
     @OneToMany(mappedBy = "pharmacy", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonBackReference
     private Set<Prescription> prescriptions;
 }

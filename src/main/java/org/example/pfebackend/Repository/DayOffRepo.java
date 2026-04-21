@@ -5,9 +5,10 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DayOffRepo extends JpaRepository<DayOff, Integer> {
-    public boolean findByDateOffAndDoctor_Id(LocalDate dateOff, Integer id);
+    public Optional<DayOff> findByDateOffAndDoctor_Id(LocalDate dateOff, Integer id);
     public List<DayOff> findByDoctor_Id(Integer id);
 }

@@ -1,6 +1,7 @@
 package org.example.pfebackend.Controller;
 
 
+import org.example.pfebackend.Dto.DashboardDto;
 import org.example.pfebackend.Entity.Admin;
 import org.example.pfebackend.Service.AdminService;
 import org.modelmapper.ModelMapper;
@@ -35,7 +36,10 @@ public class AdminController {
 
         }
     }
-
+    @GetMapping("/Dashboard")
+    public DashboardDto Dashboard() {
+        return service.GetDashboard();
+    }
     @GetMapping("/{email}")
     public ResponseEntity<Object> retrieve(@PathVariable("email") String email) {
         Optional<Admin> admin = service.retrieveAdmin(email);

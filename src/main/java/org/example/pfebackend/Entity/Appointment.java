@@ -1,5 +1,6 @@
 package org.example.pfebackend.Entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,9 +29,9 @@ public class Appointment implements Serializable{
     private AppointmentStatus appointmentStatus;
     private boolean paid = false;
     @ManyToOne
-    @JsonBackReference
+    @JsonManagedReference
     private Doctor doctor;
     @ManyToOne
-    @JsonBackReference
+    @JsonManagedReference
     private Patient patient;
 }

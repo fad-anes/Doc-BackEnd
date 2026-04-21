@@ -32,7 +32,13 @@ public class DiscussionService {
         }
         return null;
     }
-
+    public boolean deleteDiscussion(Integer idDiscussion){
+        if (!discussionRepo.existsById(idDiscussion)) {
+            return false;
+        }
+        discussionRepo.deleteById(idDiscussion);
+        return true;
+    }
     public List<Discussion> GetAllDiscussions(Integer id, String role){
         if(role.equals("DOCTOR")){
             return discussionRepo.findByDoctor_Id(id);

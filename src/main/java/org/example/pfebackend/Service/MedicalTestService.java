@@ -50,6 +50,7 @@ public class MedicalTestService {
         medicalTest.setLaboratory(laboratory.get());
         medicalTest.setDescription(m.getDescription());
         medicalTest.setTestStatus(Status.CREATED);
+        medicalTest.setDate(LocalDate.now());
         medicalTestRepo.save(medicalTest);
 
         NotificationDto notifPatient = new NotificationDto();
@@ -77,7 +78,6 @@ public class MedicalTestService {
         }
         String fileName=uploadFileService.uploadFile(file);
         medicalTest.get().setResult(fileName);
-        medicalTest.get().setDate(LocalDate.now());
         medicalTest.get().setTestStatus(Status.READY);
         medicalTestRepo.save(medicalTest.get());
 

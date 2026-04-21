@@ -127,6 +127,7 @@ public class LaboratoryService {
         Optional<Laboratory> lab = laboratoryRepo.findById(id);
         if (lab.isPresent()) {
             lab.get().setActive(!lab.get().isActive());
+            laboratoryRepo.save(lab.get());
             if(lab.get().isActive()) {
                 emailService.sendEmail(lab.get().getEmail(), "Activation du compte", "Nous sommes heureux de vous annoncer que votre compte est désormais actif et que vous pouvez accéder à l'application.");
             }

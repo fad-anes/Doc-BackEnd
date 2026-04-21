@@ -16,6 +16,4 @@ spring.mail.password=your_pass
 spring.mail.properties.mail.smtp.auth=true
 spring.mail.properties.mail.smtp.starttls.enable=true
 
-flouci.app.token=pass
-flouci.app.secret=pass
-flouci.api.base-url=https://developers.flouci.com/api
+stripe.apiKey=KEY

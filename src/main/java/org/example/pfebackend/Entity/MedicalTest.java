@@ -1,5 +1,6 @@
 package org.example.pfebackend.Entity;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,12 +26,12 @@ public class MedicalTest implements Serializable{
     @Enumerated(EnumType.STRING)
     private Status testStatus;
     @ManyToOne
-    @JsonBackReference
+    @JsonManagedReference
     private Doctor doctor;
     @ManyToOne
-    @JsonBackReference
+    @JsonManagedReference
     private Patient patient;
     @ManyToOne
-    @JsonBackReference
+    @JsonManagedReference
     private Laboratory laboratory;
 }

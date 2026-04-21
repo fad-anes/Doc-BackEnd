@@ -42,6 +42,7 @@ public class PrescriptionService {
         prescription.setDoctor(doctor.get());
         prescription.setPharmacy(pharmacy.get());
         prescription.setDescription(p.getDescription());
+        prescription.setDate(LocalDate.now());
         prescription.setPrescriptionStatus(Status.CREATED);
         prescriptionRepo.save(prescription);
 
@@ -68,7 +69,6 @@ public class PrescriptionService {
         if(!prescription.isPresent()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        prescription.get().setDate(LocalDate.now());
         prescription.get().setPrescriptionStatus(Status.READY);
         prescriptionRepo.save(prescription.get());
 
