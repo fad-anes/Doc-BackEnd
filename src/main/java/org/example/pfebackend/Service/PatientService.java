@@ -14,10 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class PatientService {
@@ -101,18 +98,16 @@ public class PatientService {
         }
         return false;
     }
-    public List<Patient> retrieveAllPatientByDoctorId(Integer id){
-        List<Patient> patients = new ArrayList<>();
-        List<Patient> p= patientRepo.findAll();
-        List<Appointment> a= appointmentRepo.findByDoctor_Id(id);
-        for(Appointment appointment:a){
-           for(Patient patient:p){
-               if(appointment.getPatient().getId().equals(patient.getId())){
-                   patients.add(appointment.getPatient());
-               }
-           }
+    public List<Patient> retrieveAllPatientByDoctorId(Integer id) {
+        List<Appointment> appointments = appointmentRepo.findByDoctor_Id(id);
+        Set<Patient> uniquePatients = new HashSet<>();
+
+        for (Appointment appointment : appointments) {
+            if (appointment.getPatient() != null) {
+                uniquePatients.add(appointment.getPatient());
+            }
         }
-        return patients;
+        return new ArrayList<>(uniquePatients);
     }
     public GetPatientsDto retrievePatientFolder(Integer id){
         Optional<Patient> pa = patientRepo.findById(id);
@@ -120,6 +115,7 @@ public class PatientService {
             return null;
         }
         GetPatientsDto dto = new GetPatientsDto();
+        dto.setId(pa.get().getId());
         dto.setFirstName(pa.get().getFirstName());
         dto.setLastName(pa.get().getLastName());
         dto.setEmail(pa.get().getEmail());
